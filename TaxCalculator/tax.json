@@ -1,0 +1,46 @@
+{
+  "Tax": {
+    "FirstStage": {
+      "Rate": 17.0
+    },
+    "SecondStage": {
+      "Rate": 18.0,
+      "Step": 42764
+    },
+    "ThirdStage": {
+      "Rate": 32.0,
+      "Step": 85528
+    }
+  },
+  "Insurance": {
+    "Retirement": 19.52,
+    "Disability": 8.0,
+    "Disease": 2.45,
+    "Accidental": 1.67,
+    "LaborFound": 2.45,
+    "Health": 9.0,
+    "HealthForReduction": 7.75
+  },
+  "Reduction": {
+    "FirstStage": {
+      "Step": 8000,
+      "Amount": 1360
+    },
+    "SecondStage": {
+      "Step": 13000,
+      "Amount": 1360,
+      "CalculationAmount": 834.88,
+      "Division": 5000
+    },
+    "ThirdStage": {
+      "Step": 85528,
+      "Amount": 525.12
+    },
+    "FourthStage": {
+      "Step": 127000,
+      "Amount": 525.12,
+      "CalculationAmount": 525.15,
+      "Division": 41472
+    }
+  }
+}
