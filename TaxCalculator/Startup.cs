@@ -31,25 +31,7 @@ namespace TaxCalculator
             services
                 .Configure<Reduction>(options => Configuration.GetSection("Reduction").Bind(options));
 
-            services.AddTransient<FirstTaxStageCalculationService>();
-            services.AddTransient<SecondTaxStageCalculationService>();
-            services.AddTransient<ThirdTaxStageCalculationService>();
-
-            services.AddTransient<Func<decimal, Tax, ITaxCalculationService>>(serviceProvider => (salaryValue, taxConfig) =>
-            {
-                if (taxConfig == null)
-                {
-                    throw new ArgumentNullException();
-                }
-
-                if (salaryValue > taxConfig.ThirdStage.Step)
-                    return serviceProvider.GetService<ThirdTaxStageCalculationService>();
-
-                if (salaryValue > taxConfig.SecondStage.Step)
-                    return serviceProvider.GetService<SecondTaxStageCalculationService>();
-
-                return serviceProvider.GetService<FirstTaxStageCalculationService>();
-            });
+            services.AddScoped(typeof(TaxCalculationService));
         }
 
         public void Configure(IApplicationBuilder app)

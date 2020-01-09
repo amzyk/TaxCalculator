@@ -11,27 +11,55 @@ namespace TaxCalculator.Controllers
     [ApiController]
     public class TaxController : ControllerBase
     {
-        private Func<decimal, Tax, ITaxCalculationService> _taxCalculationServiceResolver;
-        private Tax _taxConfig;
-
-        public TaxController(Func<decimal, Tax, ITaxCalculationService> taxCalculationServiceResolver, IOptions<Tax> taxConfigOptions)
+        private TaxCalculationService _taxCalculationService;
+        public TaxController(TaxCalculationService taxCalculationService)
         {
-            _taxCalculationServiceResolver = taxCalculationServiceResolver;
-            _taxConfig = taxConfigOptions.Value;
+            _taxCalculationService = taxCalculationService;
         }
 
-        [HttpPost]
-        public IActionResult PostSalary()
-        {
-            return Ok();
-        }
-
+        [Route("taxes")]
         [HttpGet]
         public IActionResult GetTaxesForSalary([FromBody] SalaryInfo salary)
         {
-            var taxCalculationService = _taxCalculationServiceResolver(salary.Value, _taxConfig);
-            taxCalculationService.CalculateTaxQuotes(salary.Value);
-            return Ok();
+            try
+            {
+                var taxQuotes = _taxCalculationService.CalculateTaxQuotes(salary.Value);
+                return Ok(taxQuotes);
+            }
+            catch
+            {
+                return BadRequest();
+            }
+        }
+
+        [Route("insurance")]
+        [HttpGet]
+        public IActionResult GetInsuranceQuotes([FromBody] SalaryInfo salary)
+        {
+            try
+            {
+                var insuranceQuotes = _taxCalculationService.CalculateInsuranceQuotes(salary.Value);
+                return Ok(insuranceQuotes);
+            }
+            catch
+            {
+                return BadRequest();
+            }
+        }
+
+        [Route("health")]
+        [HttpGet]
+        public IActionResult GetHealthInsuranceQuote([FromBody] SalaryInfo salary)
+        {
+            try
+            {
+                var healthInsuranceQuotes = _taxCalculationService.CalculateHealthInsuranceQuotes(salary.Value);
+                return Ok(healthInsuranceQuotes);
+            }
+            catch
+            {
+                return BadRequest();
+            }
         }
     }
 }

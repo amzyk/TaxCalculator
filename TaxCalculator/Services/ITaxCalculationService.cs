@@ -11,6 +11,5 @@ namespace TaxCalculator.Services
         HealthInsuranceInfo CalculateHealthInsuranceQuotes(decimal salary);
         InsuranceInfo CalculateInsuranceQuotes(decimal salary);
         TaxInfo CalculateTaxQuotes(decimal salary);
-        decimal CalculateTaxBase(decimal salary);
     }
 }

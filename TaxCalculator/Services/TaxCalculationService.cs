@@ -5,24 +5,28 @@ using TaxCalculator.DTO;
 
 namespace TaxCalculator.Services
 {
-    public class BaseTaxCalculationService : ITaxCalculationService
+    public class TaxCalculationService : ITaxCalculationService
     {
+        private Tax _taxConfig;
         private Reduction _reductionConfig;
         private Insurance _insuranceConfig;
 
-        public BaseTaxCalculationService(
+        public TaxCalculationService(
+            IOptions<Tax> taxConfig,
             IOptions<Insurance> insuranceConfig,
             IOptions<Reduction> reductionConfig)
         {
+            _taxConfig = taxConfig.Value;
             _reductionConfig = reductionConfig.Value;
             _insuranceConfig = insuranceConfig.Value;
         }
 
         public HealthInsuranceInfo CalculateHealthInsuranceQuotes(decimal salary)
         {
+            var value = salary * _insuranceConfig.Health / 100;
             return new HealthInsuranceInfo
             {
-                Value = salary * _insuranceConfig.Health / 100,
+                Value = Math.Round(value, 2, MidpointRounding.AwayFromZero)
             };
         }
 
@@ -46,10 +50,30 @@ namespace TaxCalculator.Services
             var basicQuote = Math.Ceiling(salary - insuranceQuotes.SumSocialQuotes());
             var taxBase = CalculateTaxBase(basicQuote);
             var resultQuote = taxBase - healthInsuranceQuotes - GetReductionQuote(salary);
-            return new TaxInfo(resultQuote);
+
+            return new TaxInfo(Math.Round(resultQuote, 2, MidpointRounding.AwayFromZero));
         }
 
-        protected decimal GetReductionQuote(decimal salary)
+        private decimal CalculateTaxBase(decimal basicQuote)
+        {
+            var firstStageQuote = _taxConfig.SecondStage.Step * _taxConfig.FirstStage.Rate / 100;
+            var secondStageQuote = (_taxConfig.ThirdStage.Step - _taxConfig.SecondStage.Step) * _taxConfig.SecondStage.Rate / 100;
+            if (basicQuote > _taxConfig.ThirdStage.Step)
+            {
+                var thirdStageQuote = (basicQuote - _taxConfig.SecondStage.Step) * _taxConfig.SecondStage.Rate / 100;
+                return firstStageQuote + secondStageQuote + thirdStageQuote;
+            }
+
+            if (basicQuote > _taxConfig.SecondStage.Step)
+            {
+                secondStageQuote = (basicQuote - _taxConfig.SecondStage.Step) * _taxConfig.SecondStage.Rate / 100;
+                return firstStageQuote + secondStageQuote;
+            }
+
+            return basicQuote * _taxConfig.FirstStage.Rate / 100;
+        }
+
+        private decimal GetReductionQuote(decimal salary)
         {
             if (salary > _reductionConfig.FourthStage.Step)
             {
@@ -76,14 +100,9 @@ namespace TaxCalculator.Services
             return _reductionConfig.FirstStage.Amount;
         }
 
-        protected decimal CalculateHealthInsuranceQuoteForReduction(decimal salary)
+        private decimal CalculateHealthInsuranceQuoteForReduction(decimal salary)
         {
             return salary * _insuranceConfig.HealthForReduction / 100;
-        }
-
-        public virtual decimal CalculateTaxBase(decimal basicQuote)
-        {
-            throw new NotImplementedException("Method should be overriden in derived class");
         }
     }
 }
