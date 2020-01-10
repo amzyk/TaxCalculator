@@ -51,7 +51,7 @@ namespace TaxCalculator.Services
             var taxBase = CalculateTaxBase(basicQuote);
             var resultQuote = taxBase - healthInsuranceQuotes - GetReductionQuote(salary);
 
-            return new TaxInfo(Math.Round(resultQuote, 2, MidpointRounding.AwayFromZero));
+            return new TaxInfo(Math.Round(resultQuote, 0, MidpointRounding.ToEven));
         }
 
         private decimal CalculateTaxBase(decimal basicQuote)
